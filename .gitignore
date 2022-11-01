@@ -1,0 +1,5 @@
+config/
+musicbot/generated
+**/__pycache__
+
+ffmpeg.exe
