@@ -143,8 +143,6 @@ class AudioController(object):
             description += "**" + str(i+1) + ")** - " + video_list[i]["title"] + "\n"
             links.append(link)
 
-        # view = SearchView(links, self.process_song)
-
         return description, links
 
     async def process_song(self, track):

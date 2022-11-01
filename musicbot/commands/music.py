@@ -15,12 +15,53 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # @commands.command(name='play', description=config.HELP_YT_LONG, help=config.HELP_YT_SHORT,
+    #                   aliases=['p', 'yt', 'pl'])
+    # async def _play_song(self, ctx, *, track: str):
+
+    #     current_guild = utils.get_guild(self.bot, ctx.message)
+    #     audiocontroller = utils.guild_to_audiocontroller[current_guild]
+
+    #     if (await utils.is_connected(ctx) == None):
+    #         if await audiocontroller.uconnect(ctx) == False:
+    #             return
+
+    #     if track.isspace() or not track:
+    #         return
+
+    #     if await utils.play_check(ctx) == False:
+    #         return
+
+    #     # reset timer
+    #     audiocontroller.timer.cancel()
+    #     audiocontroller.timer = utils.Timer(audiocontroller.timeout_handler)
+
+    #     if audiocontroller.playlist.loop == True:
+    #         await ctx.send("Loop is enabled! Use {}loop to disable".format(config.BOT_PREFIX))
+    #         return
+
+    #     song = await audiocontroller.process_song(track)
+
+    #     if song is None:
+    #         await ctx.send(config.SONGINFO_ERROR)
+    #         return
+
+    #     if song.origin == linkutils.Origins.Default:
+
+    #         if audiocontroller.current_song != None and len(audiocontroller.playlist.playque) == 0:
+    #             await ctx.send(embed=song.info.format_output(config.SONGINFO_NOW_PLAYING))
+    #         else:
+    #             await ctx.send(embed=song.info.format_output(config.SONGINFO_QUEUE_ADDED))
+
+    #     elif song.origin == linkutils.Origins.Playlist:
+    #         await ctx.send(config.SONGINFO_PLAYLIST_QUEUED)
+
     @commands.command(name='play', description=config.HELP_YT_LONG, help=config.HELP_YT_SHORT,
                       aliases=['p', 'yt', 'pl'])
     async def _play_song(self, ctx, *, track: str):
-
         current_guild = utils.get_guild(self.bot, ctx.message)
         audiocontroller = utils.guild_to_audiocontroller[current_guild]
+        host = linkutils.identify_url(track)
 
         if (await utils.is_connected(ctx) == None):
             if await audiocontroller.uconnect(ctx) == False:
@@ -32,7 +73,6 @@ class Music(commands.Cog):
         if await utils.play_check(ctx) == False:
             return
 
-        # reset timer
         audiocontroller.timer.cancel()
         audiocontroller.timer = utils.Timer(audiocontroller.timeout_handler)
 
@@ -40,7 +80,25 @@ class Music(commands.Cog):
             await ctx.send("Loop is enabled! Use {}loop to disable".format(config.BOT_PREFIX))
             return
 
-        song = await audiocontroller.process_song(track)
+            
+        if host == linkutils.Sites.Unknown:
+            description, links = await audiocontroller.search_song(track)
+
+            embed = discord.Embed(description=description)
+
+            await ctx.send(embed=embed)
+
+            def check(m):
+                if m.content.isdigit():
+                    return int(m.content) < 6 and int(m.content) > 0
+                return false
+
+            msg = await self.bot.wait_for('message', check=check)
+
+            song = await audiocontroller.process_song(links[int(msg.content)-1])
+
+        else:
+            song = await audiocontroller.process_song(track)
 
         if song is None:
             await ctx.send(config.SONGINFO_ERROR)
@@ -146,60 +204,6 @@ class Music(commands.Cog):
                     song.info.title, song.info.webpage_url))
 
         await ctx.send(embed=embed)
-
-    @commands.command(name='search')
-    async def _search(self, ctx, *, track: str):
-        current_guild = utils.get_guild(self.bot, ctx.message)
-        audiocontroller = utils.guild_to_audiocontroller[current_guild]
-
-        if (await utils.is_connected(ctx) == None):
-            if await audiocontroller.uconnect(ctx) == False:
-                return
-
-        if track.isspace() or not track:
-            return
-
-        if await utils.play_check(ctx) == False:
-            return
-
-        audiocontroller.timer.cancel()
-        audiocontroller.timer = utils.Timer(audiocontroller.timeout_handler)
-
-        if audiocontroller.playlist.loop == True:
-            await ctx.send("Loop is enabled! Use {}loop to disable".format(config.BOT_PREFIX))
-            return
-
-        description, links = await audiocontroller.search_song(track)
-
-        embed = discord.Embed(description=description)
-
-        await ctx.send(embed=embed)
-
-        def check(m):
-            print(m)
-            if m.content.isdigit():
-                return int(m.content) < 6 and int(m.content) > 0
-            return false
-
-        msg = await self.bot.wait_for('message', check=check)
-
-        print(msg)
-
-        song = await audiocontroller.process_song(links[int(msg.content)-1])
-
-        if song is None:
-            await ctx.send(config.SONGINFO_ERROR)
-            return
-
-        if song.origin == linkutils.Origins.Default:
-
-            if audiocontroller.current_song != None and len(audiocontroller.playlist.playque) == 0:
-                await ctx.send(embed=song.info.format_output(config.SONGINFO_NOW_PLAYING))
-            else:
-                await ctx.send(embed=song.info.format_output(config.SONGINFO_QUEUE_ADDED))
-
-        elif song.origin == linkutils.Origins.Playlist:
-            await ctx.send(config.SONGINFO_PLAYLIST_QUEUED)
 
     @commands.command(name='stop', description=config.HELP_STOP_LONG, help=config.HELP_STOP_SHORT, aliases=['st'])
     async def _stop(self, ctx):
