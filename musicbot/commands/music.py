@@ -84,18 +84,24 @@ class Music(commands.Cog):
         if host == linkutils.Sites.Unknown:
             description, links = await audiocontroller.search_song(track)
 
-            embed = discord.Embed(description=description)
-
-            await ctx.send(embed=embed)
+            message = await ctx.send(embed=discord.Embed(title=config.PICK_SONG_TITLE, description=description))
 
             def check(m):
-                if m.content.isdigit():
-                    return int(m.content) < 6 and int(m.content) > 0
-                return false
+                if m.content == "c":
+                    return ctx.channel == m.channel and ctx.author == m.author
+                elif m.content.isdigit():
+                    return int(m.content) < 6 and int(m.content) > 0 and ctx.channel == m.channel and ctx.author == m.author
+                return False
 
             msg = await self.bot.wait_for('message', check=check)
+            
+            await message.delete()
+
+            if msg.content == "c":
+                return
 
             song = await audiocontroller.process_song(links[int(msg.content)-1])
+
 
         else:
             song = await audiocontroller.process_song(track)
@@ -245,7 +251,7 @@ class Music(commands.Cog):
             return
         await ctx.send("Moved")
 
-    @commands.command(name='skip', description=config.HELP_SKIP_LONG, help=config.HELP_SKIP_SHORT, aliases=['s'])
+    @commands.command(name='skip', description=config.HELP_SKIP_LONG, help=config.HELP_SKIP_SHORT, aliases=['s', 'next'])
     async def _skip(self, ctx):
         current_guild = utils.get_guild(self.bot, ctx.message)
 

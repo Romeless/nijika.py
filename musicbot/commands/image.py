@@ -31,7 +31,7 @@ class ImageManip(commands.Cog):
         res = numpy.dot(numpy.linalg.inv(A.T * A) * A.T, B)
         return numpy.array(res).reshape(8)
 
-    @commands.command(name="nijisign", description="Nijika holding a sign.")
+    @commands.command(name="nijisign", description=config.HELP_NIJISIGN_LONG, help=config.HELP_NIJISIGN_SHORT)
     async def nijisign(self, ctx: commands.Context, *, text: str = None):
         text = text or f"Hello {ctx.author.name}! Nijika here!"
         
@@ -59,7 +59,7 @@ class ImageManip(commands.Cog):
 
         await ctx.send(file=dfile)
 
-    @commands.command(name="bocchisign", description="Bocchi holding a sign")
+    @commands.command(name="bocchisign", description=config.HELP_BOCCHISIGN_LONG, help=config.HELP_BOCCHISIGN_SHORT)
     async def bocchisign(self, ctx, *, text: str = None):
         text = text or f"I'm a bad bot host"
 

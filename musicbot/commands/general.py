@@ -30,7 +30,7 @@ class General(commands.Cog):
         audiocontroller = utils.guild_to_audiocontroller[current_guild]
         await audiocontroller.udisconnect()
 
-    @commands.command(name='reset', description=config.HELP_DISCONNECT_LONG, help=config.HELP_DISCONNECT_SHORT, aliases=['rs', 'restart'])
+    @commands.command(name='reset', description=config.HELP_RESET_LONG, help=config.HELP_RESET_SHORT, aliases=['rs', 'restart'])
     async def _reset(self, ctx):
         current_guild = utils.get_guild(self.bot, ctx.message)
 
@@ -46,50 +46,30 @@ class General(commands.Cog):
 
         await ctx.send("{} Connected to {}".format(":white_check_mark:", ctx.author.voice.channel.name))
 
-    @commands.command(name='changechannel', description=config.HELP_CHANGECHANNEL_LONG, help=config.HELP_CHANGECHANNEL_SHORT, aliases=['cc'])
-    async def _change_channel(self, ctx):
-        current_guild = utils.get_guild(self.bot, ctx.message)
+    # @commands.command(name='changechannel', description=config.HELP_CHANGECHANNEL_LONG, help=config.HELP_CHANGECHANNEL_SHORT, aliases=['cc'])
+    # async def _change_channel(self, ctx):
+    #     current_guild = utils.get_guild(self.bot, ctx.message)
 
-        vchannel = await utils.is_connected(ctx)
-        if vchannel == ctx.author.voice.channel:
-            await ctx.send("{} Already connected to {}".format(":white_check_mark:", vchannel.name))
-            return
+    #     vchannel = await utils.is_connected(ctx)
+    #     if vchannel == ctx.author.voice.channel:
+    #         await ctx.send("{} Already connected to {}".format(":white_check_mark:", vchannel.name))
+    #         return
 
-        if current_guild is None:
-            await ctx.send(config.NO_GUILD_MESSAGE)
-            return
-        await utils.guild_to_audiocontroller[current_guild].stop_player()
-        await current_guild.voice_client.disconnect(force=True)
+    #     if current_guild is None:
+    #         await ctx.send(config.NO_GUILD_MESSAGE)
+    #         return
+    #     await utils.guild_to_audiocontroller[current_guild].stop_player()
+    #     await current_guild.voice_client.disconnect(force=True)
 
-        guild_to_audiocontroller[current_guild] = AudioController(
-            self.bot, current_guild)
-        await guild_to_audiocontroller[current_guild].register_voice_channel(ctx.author.voice.channel)
+    #     guild_to_audiocontroller[current_guild] = AudioController(
+    #         self.bot, current_guild)
+    #     await guild_to_audiocontroller[current_guild].register_voice_channel(ctx.author.voice.channel)
 
-        await ctx.send("{} Switched to {}".format(":white_check_mark:", ctx.author.voice.channel.name))
+    #     await ctx.send("{} Switched to {}".format(":white_check_mark:", ctx.author.voice.channel.name))
 
     @commands.command(name='ping', description=config.HELP_PING_LONG, help=config.HELP_PING_SHORT)
     async def _ping(self, ctx):
         await ctx.send("Pong")
-
-    @commands.command(name='setting', description=config.HELP_SHUFFLE_LONG, help=config.HELP_SETTINGS_SHORT, aliases=['settings', 'set'])
-    @has_permissions(administrator=True)
-    async def _settings(self, ctx, *args):
-
-        sett = guild_to_settings[ctx.guild]
-
-        if len(args) == 0:
-            await ctx.send(embed=await sett.format())
-            return
-
-        args_list = list(args)
-        args_list.remove(args[0])
-
-        response = await sett.write(args[0], " ".join(args_list), ctx)
-
-        if response is None:
-            await ctx.send("`Error: Setting not found`")
-        elif response is True:
-            await ctx.send("Setting updated!")
 
 def setup(bot):
     bot.add_cog(General(bot))

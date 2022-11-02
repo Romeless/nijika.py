@@ -134,13 +134,14 @@ class AudioController(object):
 
     async def search_song(self, title):
         video_list = YoutubeSearch(title, max_results=5).to_dict()
+        print(video_list)
 
-        description = ""
+        description = config.PICK_SONG_DESCRIPTION + "\n\n"
         links = []
         
         for i in range(0, len(video_list)):
             link = "https://www.youtube.com" + video_list[i]['url_suffix']
-            description += "**" + str(i+1) + ")** - " + video_list[i]["title"] + "\n"
+            description += "**" + str(i+1) + ".** " + video_list[i]["title"] + " **(" + video_list[i]["duration"].replace('.', ":").zfill(5) + ")** " "\n"
             links.append(link)
 
         return description, links
@@ -175,6 +176,8 @@ class AudioController(object):
 
         if host == linkutils.Sites.YouTube:
             track = track.split("&list=")[0]
+
+        ### PLAY SONG
 
         try:
             downloader = yt_dlp.YoutubeDL(
