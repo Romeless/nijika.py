@@ -1,0 +1,10 @@
+py-cord
+py-cord[voice]
+yt-dlp
+aiohttp
+asyncio
+beautifulsoup4
+spotipy
+Pillow
+numpy
+youtube_search

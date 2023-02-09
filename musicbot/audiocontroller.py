@@ -134,8 +134,6 @@ class AudioController(object):
 
     async def search_song(self, title):
         video_list = YoutubeSearch(title, max_results=5).to_dict()
-        print(video_list)
-
         description = config.PICK_SONG_DESCRIPTION + "\n\n"
         links = []
         
